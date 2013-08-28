@@ -7,6 +7,7 @@
 //
 
 #import "RNFrostedSidebar.h"
+#import <QuartzCore/QuartzCore.h>
 
 #pragma mark - Categories
 

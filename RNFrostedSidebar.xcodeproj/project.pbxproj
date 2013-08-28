@@ -32,6 +32,8 @@
 		8646016317BAF99800FCE7F4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8646016217BAF99800FCE7F4 /* CoreGraphics.framework */; };
 		8646016517BAF99800FCE7F4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8646016417BAF99800FCE7F4 /* UIKit.framework */; };
 		8681BB5917BAFB5A007F1B43 /* RNFrostedSidebar.m in Sources */ = {isa = PBXBuildFile; fileRef = 8681BB5817BAFB5A007F1B43 /* RNFrostedSidebar.m */; };
+		86D2CBF917CEAFE50098397C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 862D1B2317BC2C9B00157004 /* QuartzCore.framework */; };
+		86D2CBFA17CEAFE90098397C /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 862D1B2517BC2CA000157004 /* Accelerate.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,6 +78,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				86D2CBFA17CEAFE90098397C /* Accelerate.framework in Frameworks */,
+				86D2CBF917CEAFE50098397C /* QuartzCore.framework in Frameworks */,
 				8646016317BAF99800FCE7F4 /* CoreGraphics.framework in Frameworks */,
 				8646016517BAF99800FCE7F4 /* UIKit.framework in Frameworks */,
 				8646016117BAF99800FCE7F4 /* Foundation.framework in Frameworks */,
