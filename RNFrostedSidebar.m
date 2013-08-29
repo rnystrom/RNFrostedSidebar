@@ -6,6 +6,8 @@
 //  Copyright (c) 2013 Ryan Nystrom. All rights reserved.
 //
 
+#define __IPHONE_OS_VERSION_SOFT_MAX_REQUIRED __IPHONE_7_0
+
 #import "RNFrostedSidebar.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -384,39 +386,37 @@ static RNFrostedSidebar *rn_frostedMenu;
                      completion:nil];
     
     CGFloat initDelay = 0.1f;
-    BOOL useNewAnimationAPIs = [UIView instancesRespondToSelector:@selector(animateWithDuration:delay:usingSpringWithDamping:initialSpringVelocity:options:animations:completion:)];
     [self.itemViews enumerateObjectsUsingBlock:^(RNCalloutItemView *view, NSUInteger idx, BOOL *stop) {
         view.layer.transform = CATransform3DMakeScale(0.3, 0.3, 1);
         view.alpha = 0;
         view.originalBackgroundColor = self.itemBackgroundColor;
         view.layer.borderWidth = self.borderWidth;
         
-        if (useNewAnimationAPIs) {
-            [UIView animateWithDuration:0.5
-                                  delay:(initDelay + idx*0.1f)
-                 usingSpringWithDamping:10
-                  initialSpringVelocity:50
-                                options:UIViewAnimationOptionBeginFromCurrentState
-                             animations:^{
+#if __IPHONE_OS_VERSION_SOFT_MAX_REQUIRED
+        [UIView animateWithDuration:0.5
+                              delay:(initDelay + idx*0.1f)
+             usingSpringWithDamping:10
+              initialSpringVelocity:50
+                            options:UIViewAnimationOptionBeginFromCurrentState
+                         animations:^{
+                             view.layer.transform = CATransform3DIdentity;
+                             view.alpha = 1;
+                         }
+                         completion:nil];
+#else
+        [UIView animateWithDuration:0.2
+                              delay:(initDelay + idx*0.1f)
+                            options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationCurveEaseInOut
+                         animations:^{
+                             view.layer.transform = CATransform3DMakeScale(1.1, 1.1, 1);
+                             view.alpha = 1;
+                         }
+                         completion:^(BOOL finished) {
+                             [UIView animateWithDuration:0.1 animations:^{
                                  view.layer.transform = CATransform3DIdentity;
-                                 view.alpha = 1;
-                             }
-                             completion:nil];
-        }
-        else {
-            [UIView animateWithDuration:0.2
-                                  delay:(initDelay + idx*0.1f)
-                                options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationCurveEaseInOut
-                             animations:^{
-                                 view.layer.transform = CATransform3DMakeScale(1.1, 1.1, 1);
-                                 view.alpha = 1;
-                             }
-                             completion:^(BOOL finished) {
-                                 [UIView animateWithDuration:0.1 animations:^{
-                                     view.layer.transform = CATransform3DIdentity;
-                                 }];
                              }];
-        }
+                         }];
+#endif
     }];
 }
 
