@@ -51,6 +51,7 @@
                         ];
     
     RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors];
+//    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images];
     callout.delegate = self;
 //    callout.showFromRight = YES;
     [callout show];
