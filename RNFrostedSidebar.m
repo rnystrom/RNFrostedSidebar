@@ -353,37 +353,32 @@ static RNFrostedSidebar *rn_frostedMenu;
     [self rn_addToParentViewController:controller callingAppearanceMethods:YES];
     self.view.frame = controller.view.bounds;
     
-    CGFloat parentWidth = self.parentViewController.view.bounds.size.width;
-    CGRect frame = controller.view.bounds;
-    frame.origin.x = self.showFromRight ? parentWidth - _width : 0;
-    frame.size.width = _width;
-    self.contentView.frame = frame;
+    CGFloat parentWidth = self.view.bounds.size.width;
     
-    CGRect blurFrame = frame;
-    blurFrame.origin.x = _width;
-    blurFrame.size.width = 0;
+    CGRect contentFrame = self.view.bounds;
+    contentFrame.origin.x = _showFromRight ? parentWidth : -_width;
+    contentFrame.size.width = _width;
+    self.contentView.frame = contentFrame;
     
     [self layoutItems];
     
+    CGRect blurFrame = CGRectMake(_showFromRight ? self.view.bounds.size.width : 0, 0, 0, self.view.bounds.size.height);
+    
     self.blurView = [[UIImageView alloc] initWithImage:blurImage];
     self.blurView.frame = blurFrame;
-    self.blurView.contentMode = self.showFromRight ? UIViewContentModeTopRight : UIViewContentModeTopLeft;
+    self.blurView.contentMode = _showFromRight ? UIViewContentModeTopRight : UIViewContentModeTopLeft;
     self.blurView.clipsToBounds = YES;
     [self.view insertSubview:self.blurView belowSubview:self.contentView];
     
-    frame = self.view.bounds;
-    frame.origin.x = self.showFromRight ? self.view.bounds.size.width : -_width;
-    self.view.frame = frame;
-    
-    frame.origin.x = 0;
-    blurFrame.origin.x = self.showFromRight ? parentWidth - _width : 0;
+    contentFrame.origin.x = _showFromRight ? parentWidth - _width : 0;
+    blurFrame.origin.x = contentFrame.origin.x;
     blurFrame.size.width = _width;
     
     [UIView animateWithDuration:self.animationDuration
                           delay:0
                         options:kNilOptions
                      animations:^{
-                         self.view.frame = frame;
+                         self.contentView.frame = contentFrame;
                          self.blurView.frame = blurFrame;
                      }
                      completion:nil];
@@ -449,18 +444,19 @@ static RNFrostedSidebar *rn_frostedMenu;
     };
     
     if (animated) {
-        CGRect frame = self.view.frame;
-        frame.origin.x = self.showFromRight ? self.view.bounds.size.width : -_width;
+        CGFloat parentWidth = self.view.bounds.size.width;
+        CGRect contentFrame = self.contentView.frame;
+        contentFrame.origin.x = self.showFromRight ? parentWidth : -_width;
         
         CGRect blurFrame = self.blurView.frame;
-        blurFrame.origin.x = _width;
+        blurFrame.origin.x = self.showFromRight ? parentWidth : 0;
         blurFrame.size.width = 0;
         
         [UIView animateWithDuration:self.animationDuration
                               delay:0
                             options:UIViewAnimationOptionBeginFromCurrentState
                          animations:^{
-                             self.view.frame = frame;
+                             self.contentView.frame = contentFrame;
                              self.blurView.frame = blurFrame;
                          }
                          completion:completion];
@@ -488,14 +484,7 @@ static RNFrostedSidebar *rn_frostedMenu;
 #pragma mark - Private
 
 - (void)didTapItemAtIndex:(NSUInteger)index {
-    if ([self.delegate respondsToSelector:@selector(sidebar:didTapItemAtIndex:)]) {
-        [self.delegate sidebar:self didTapItemAtIndex:index];
-    }
-
     BOOL didEnable = ! [self.selectedIndices containsIndex:index];
-    if ([self.delegate respondsToSelector:@selector(sidebar:didEnable:itemAtIndex:)]) {
-        [self.delegate sidebar:self didEnable:didEnable itemAtIndex:index];
-    }
     
     if (self.borderColors) {
         UIColor *stroke = self.borderColors[index];
@@ -517,17 +506,21 @@ static RNFrostedSidebar *rn_frostedMenu;
             [self.selectedIndices removeIndex:index];
         }
         
-        UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(-CGRectGetMidX(view.bounds), -CGRectGetMidY(view.bounds), view.bounds.size.width, view.bounds.size.height) cornerRadius:view.layer.cornerRadius];
+        CGRect pathFrame = CGRectMake(-CGRectGetMidX(view.bounds), -CGRectGetMidY(view.bounds), view.bounds.size.width, view.bounds.size.height);
+        UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:pathFrame cornerRadius:view.layer.cornerRadius];
+        
+        // accounts for left/right offset and contentOffset of scroll view
+        CGPoint shapePosition = [self.view convertPoint:view.center fromView:self.contentView];
         
         CAShapeLayer *circleShape = [CAShapeLayer layer];
         circleShape.path = path.CGPath;
-        circleShape.position = CGPointMake(CGRectGetMidX(view.frame), CGRectGetMidY(view.frame));
+        circleShape.position = shapePosition;
         circleShape.fillColor = [UIColor clearColor].CGColor;
         circleShape.opacity = 0;
         circleShape.strokeColor = stroke.CGColor;
         circleShape.lineWidth = self.borderWidth;
         
-        [self.contentView.layer addSublayer:circleShape];
+        [self.view.layer addSublayer:circleShape];
         
         CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
         scaleAnimation.fromValue = [NSValue valueWithCATransform3D:CATransform3DIdentity];
@@ -542,6 +535,13 @@ static RNFrostedSidebar *rn_frostedMenu;
         animation.duration = 0.5f;
         animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
         [circleShape addAnimation:animation forKey:nil];
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(sidebar:didTapItemAtIndex:)]) {
+        [self.delegate sidebar:self didTapItemAtIndex:index];
+    }
+    if ([self.delegate respondsToSelector:@selector(sidebar:didEnable:itemAtIndex:)]) {
+        [self.delegate sidebar:self didEnable:didEnable itemAtIndex:index];
     }
 }
 
