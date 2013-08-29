@@ -7,7 +7,7 @@ This project is [another](https://github.com/rnystrom/RNRippleTableView) UI cont
 
 <p align="center"><img title="Open and close animation" src="https://raw.github.com/rnystrom/RNFrostedMenu/master/images/open.gif"/></p>
 
-You'll notice that this control's use of blur does not match Jakub's original design exactly. In the original design the background of the buttons is blurred, while the overlay of the control is simply shaded. There have [been](https://github.com/alexdrone/ios-realtimeblur) [attempts](https://github.com/JagCesar/iOS-blur) at recreating
+You'll notice that this control's use of blur does not match Jakub's original design exactly. In the original design the background of the buttons is blurred, while the overlay of the control is simply shaded. There have [been](https://github.com/alexdrone/ios-realtimeblur) [attempts](https://github.com/JagCesar/iOS-blur) at recreating this effect, but it is [rumored](http://stackoverflow.com/a/17299759/940936) that live-blurring takes place at a much lower level on the GPU and there would be security concerns were we to have access.
 
 Apple is being a little deceptive with their use of blurring in iOS 7. Bottom line, **don't animate blurs** in your designs. 
 
