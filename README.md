@@ -11,7 +11,7 @@ You'll notice that this control's use of blur does not match Jakub's original de
 
 Apple is being a little deceptive with their use of blurring in iOS 7. Bottom line, **don't animate blurs** in your designs. 
 
-If you examine the source of this project you'll see that I'm actually cheating to get the blur layer to animate overtop the original view.
+If you examine the source of this project you'll see that I'm actually [cheating](https://github.com/rnystrom/RNFrostedSidebar/blob/master/RNFrostedSidebar.m#L371) to get the blur layer to animate overtop the original view.
 
 <p align="center"><img title="Money shot" src="https://raw.github.com/rnystrom/RNFrostedMenu/master/images/click.gif"/></p>
 
