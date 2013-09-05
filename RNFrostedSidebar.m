@@ -342,6 +342,36 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 #pragma mark - Show
 
+- (void)animateSpringWithView:(RNCalloutItemView *)view idx:(NSUInteger)idx initDelay:(CGFloat)initDelay {
+#if __IPHONE_OS_VERSION_SOFT_MAX_REQUIRED
+    [UIView animateWithDuration:0.5
+                          delay:(initDelay + idx*0.1f)
+         usingSpringWithDamping:10
+          initialSpringVelocity:50
+                        options:UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                         view.layer.transform = CATransform3DIdentity;
+                         view.alpha = 1;
+                     }
+                     completion:nil];
+#endif
+}
+
+- (void)animateFauxBounceWithView:(RNCalloutItemView *)view idx:(NSUInteger)idx initDelay:(CGFloat)initDelay {
+    [UIView animateWithDuration:0.2
+                          delay:(initDelay + idx*0.1f)
+                        options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationCurveEaseInOut
+                     animations:^{
+                         view.layer.transform = CATransform3DMakeScale(1.1, 1.1, 1);
+                         view.alpha = 1;
+                     }
+                     completion:^(BOOL finished) {
+                         [UIView animateWithDuration:0.1 animations:^{
+                             view.layer.transform = CATransform3DIdentity;
+                         }];
+                     }];
+}
+
 - (void)showInViewController:(UIViewController *)controller animated:(BOOL)animated {
     if (rn_frostedMenu != nil) {
         [rn_frostedMenu dismissAnimated:NO];
@@ -386,37 +416,21 @@ static RNFrostedSidebar *rn_frostedMenu;
                      completion:nil];
     
     CGFloat initDelay = 0.1f;
+    SEL sdkSpringSelector = NSSelectorFromString(@"animateWithDuration:delay:usingSpringWithDamping:initialSpringVelocity:options:animations:completion:");
+    BOOL sdkHasSpringAnimation = [UIView respondsToSelector:sdkSpringSelector];
+    
     [self.itemViews enumerateObjectsUsingBlock:^(RNCalloutItemView *view, NSUInteger idx, BOOL *stop) {
         view.layer.transform = CATransform3DMakeScale(0.3, 0.3, 1);
         view.alpha = 0;
         view.originalBackgroundColor = self.itemBackgroundColor;
         view.layer.borderWidth = self.borderWidth;
         
-#if __IPHONE_OS_VERSION_SOFT_MAX_REQUIRED
-        [UIView animateWithDuration:0.5
-                              delay:(initDelay + idx*0.1f)
-             usingSpringWithDamping:10
-              initialSpringVelocity:50
-                            options:UIViewAnimationOptionBeginFromCurrentState
-                         animations:^{
-                             view.layer.transform = CATransform3DIdentity;
-                             view.alpha = 1;
-                         }
-                         completion:nil];
-#else
-        [UIView animateWithDuration:0.2
-                              delay:(initDelay + idx*0.1f)
-                            options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationCurveEaseInOut
-                         animations:^{
-                             view.layer.transform = CATransform3DMakeScale(1.1, 1.1, 1);
-                             view.alpha = 1;
-                         }
-                         completion:^(BOOL finished) {
-                             [UIView animateWithDuration:0.1 animations:^{
-                                 view.layer.transform = CATransform3DIdentity;
-                             }];
-                         }];
-#endif
+        if (sdkHasSpringAnimation) {
+            [self animateSpringWithView:view idx:idx initDelay:initDelay];
+        }
+        else {
+            [self animateFauxBounceWithView:view idx:idx initDelay:initDelay];
+        }
     }];
 }
 
