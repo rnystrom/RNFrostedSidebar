@@ -252,6 +252,7 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 - (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors {
     if (self = [super init]) {
+        _isSingleSelect = NO;
         _contentView = [[UIScrollView alloc] init];
         _contentView.alwaysBounceHorizontal = NO;
         _contentView.alwaysBounceVertical = YES;
