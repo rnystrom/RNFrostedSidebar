@@ -20,7 +20,7 @@ If you examine the source of this project you'll see that I'm actually [cheating
 The preferred method of installation is with [CocoaPods](http://cocoapods.org/). Just add this line to your Podfile.
 
 ```
-pod 'RNFrostedSidebar', '~> 0.1.0'
+pod 'RNFrostedSidebar', '~> 0.2.0'
 ```
 
 Or if you want to install manually, drag and drop the <code>RNFrostedSidebar</code> .h and .m files into your project. To get this working, you'll need to include the following frameworks in **Link Binary with Libraries**:
@@ -107,9 +107,13 @@ The border width for item views. Default 2.
 @property (nonatomic, weak) id <RNFrostedSidebarDelegate> delegate;
 ```
 
-An optional delegate to respond to selection of item views. The two optional delegate methods are:
+An optional delegate to respond to selection of item views. Optional delegate methods, provided by [George Villasboas](https://github.com/ghvillasboas) include:
 
 ```objc
+- (void)sidebar:(RNFrostedSidebar *)sidebar willShowOnScreenAnimated:(BOOL)animatedYesOrNo;
+- (void)sidebar:(RNFrostedSidebar *)sidebar didShowOnScreenAnimated:(BOOL)animatedYesOrNo;
+- (void)sidebar:(RNFrostedSidebar *)sidebar willDismissFromScreenAnimated:(BOOL)animatedYesOrNo;
+- (void)sidebar:(RNFrostedSidebar *)sidebar didDismissFromScreenAnimated:(BOOL)animatedYesOrNo;
 - (void)sidebar:(RNFrostedSidebar *)sidebar didTapItemAtIndex:(NSUInteger)index;
 - (void)sidebar:(RNFrostedSidebar *)sidebar didEnable:(BOOL)itemEnabled itemAtIndex:(NSUInteger)index;
 ```
