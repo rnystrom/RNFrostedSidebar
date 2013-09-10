@@ -377,6 +377,10 @@ static RNFrostedSidebar *rn_frostedMenu;
         [rn_frostedMenu dismissAnimated:NO];
     }
     
+    if ([self.delegate respondsToSelector:@selector(sidebar:willShowOnScreenAnimated:)]) {
+        [self.delegate sidebar:self willShowOnScreenAnimated:animated];
+    }
+    
     rn_frostedMenu = self;
     
     UIImage *blurImage = [controller.view rn_screenshot];
@@ -406,36 +410,26 @@ static RNFrostedSidebar *rn_frostedMenu;
     blurFrame.origin.x = contentFrame.origin.x;
     blurFrame.size.width = _width;
     
-    // tell the delegate that the menu is about to show on screen
-    if ([self.delegate respondsToSelector:@selector(sidebar:willShowOnScreenAnimated:)]) {
-        [self.delegate sidebar:self willShowOnScreenAnimated:animated];
-    }
+    void (^animations)() = ^{
+        self.contentView.frame = contentFrame;
+        self.blurView.frame = blurFrame;
+    };
+    void (^completion)(BOOL) = ^(BOOL finished) {
+        if (finished && [self.delegate respondsToSelector:@selector(sidebar:didShowOnScreenAnimated:)]) {
+            [self.delegate sidebar:self didShowOnScreenAnimated:animated];
+        }
+    };
     
     if (animated) {
         [UIView animateWithDuration:self.animationDuration
                               delay:0
                             options:kNilOptions
-                         animations:^{
-                             self.contentView.frame = contentFrame;
-                             self.blurView.frame = blurFrame;
-                         }
-                         completion:^(BOOL finished) {
-                             if (finished) {
-                                 // tell the delegate that the menu just finished showing on screen
-                                 if ([self.delegate respondsToSelector:@selector(sidebar:didShowOnScreenAnimated:)]) {
-                                     [self.delegate sidebar:self didShowOnScreenAnimated:animated];
-                                 }
-                             }
-                         }];
+                         animations:animations
+                         completion:completion];
     }
     else{
-        self.contentView.frame = contentFrame;
-        self.blurView.frame = blurFrame;
-        
-        // tell the delegate that the menu just finished showing on screen
-        if ([self.delegate respondsToSelector:@selector(sidebar:didShowOnScreenAnimated:)]) {
-            [self.delegate sidebar:self didShowOnScreenAnimated:animated];
-        }
+        animations();
+        completion(YES);
     }
     
     CGFloat initDelay = 0.1f;
