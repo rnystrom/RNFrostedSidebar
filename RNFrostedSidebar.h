@@ -59,6 +59,10 @@
 // Default 2
 @property (nonatomic, assign) NSUInteger borderWidth;
 
+// If YES, only a single item can be selected at a time, and one item is always selected
+// Default NO
+@property (nonatomic, assign) BOOL isSingleSelect;
+
 // An optional delegate to respond to interaction events
 @property (nonatomic, weak) id <RNFrostedSidebarDelegate> delegate;
 

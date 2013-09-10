@@ -530,6 +530,13 @@ static RNFrostedSidebar *rn_frostedMenu;
         UIView *view = self.itemViews[index];
         
         if (didEnable) {
+            if (_isSingleSelect){
+                [self.selectedIndices removeAllIndexes];
+                [self.itemViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                    UIView *aView = (UIView *)obj;
+                    [[aView layer] setBorderColor:[[UIColor clearColor] CGColor]];
+                }];
+            }
             view.layer.borderColor = stroke.CGColor;
             
             CABasicAnimation *borderAnimation = [CABasicAnimation animationWithKeyPath:@"borderColor"];
@@ -541,8 +548,10 @@ static RNFrostedSidebar *rn_frostedMenu;
             [self.selectedIndices addIndex:index];
         }
         else {
-            view.layer.borderColor = [UIColor clearColor].CGColor;
-            [self.selectedIndices removeIndex:index];
+            if (!_isSingleSelect){
+                view.layer.borderColor = [UIColor clearColor].CGColor;
+                [self.selectedIndices removeIndex:index];
+            }
         }
         
         CGRect pathFrame = CGRectMake(-CGRectGetMidX(view.bounds), -CGRectGetMidY(view.bounds), view.bounds.size.width, view.bounds.size.height);
