@@ -406,14 +406,37 @@ static RNFrostedSidebar *rn_frostedMenu;
     blurFrame.origin.x = contentFrame.origin.x;
     blurFrame.size.width = _width;
     
-    [UIView animateWithDuration:self.animationDuration
-                          delay:0
-                        options:kNilOptions
-                     animations:^{
-                         self.contentView.frame = contentFrame;
-                         self.blurView.frame = blurFrame;
-                     }
-                     completion:nil];
+    // tell the delegate that the menu is about to show on screen
+    if ([self.delegate respondsToSelector:@selector(sidebar:willShowOnScreenAnimated:)]) {
+        [self.delegate sidebar:self willShowOnScreenAnimated:animated];
+    }
+    
+    if (animated) {
+        [UIView animateWithDuration:self.animationDuration
+                              delay:0
+                            options:kNilOptions
+                         animations:^{
+                             self.contentView.frame = contentFrame;
+                             self.blurView.frame = blurFrame;
+                         }
+                         completion:^(BOOL finished) {
+                             if (finished) {
+                                 // tell the delegate that the menu just finished showing on screen
+                                 if ([self.delegate respondsToSelector:@selector(sidebar:didShowOnScreenAnimated:)]) {
+                                     [self.delegate sidebar:self didShowOnScreenAnimated:animated];
+                                 }
+                             }
+                         }];
+    }
+    else{
+        self.contentView.frame = contentFrame;
+        self.blurView.frame = blurFrame;
+        
+        // tell the delegate that the menu just finished showing on screen
+        if ([self.delegate respondsToSelector:@selector(sidebar:didShowOnScreenAnimated:)]) {
+            [self.delegate sidebar:self didShowOnScreenAnimated:animated];
+        }
+    }
     
     CGFloat initDelay = 0.1f;
     SEL sdkSpringSelector = NSSelectorFromString(@"animateWithDuration:delay:usingSpringWithDamping:initialSpringVelocity:options:animations:completion:");
@@ -455,7 +478,15 @@ static RNFrostedSidebar *rn_frostedMenu;
 - (void)dismissAnimated:(BOOL)animated {
     void (^completion)(BOOL) = ^(BOOL finished){
         [self rn_removeFromParentViewControllerCallingAppearanceMethods:YES];
+        
+        if ([self.delegate respondsToSelector:@selector(sidebar:didDismissFromScreenAnimated:)]) {
+            [self.delegate sidebar:self didDismissFromScreenAnimated:YES];
+        }
     };
+    
+    if ([self.delegate respondsToSelector:@selector(sidebar:willDismissFromScreenAnimated:)]) {
+        [self.delegate sidebar:self willDismissFromScreenAnimated:YES];
+    }
     
     if (animated) {
         CGFloat parentWidth = self.view.bounds.size.width;
@@ -605,7 +636,7 @@ static RNFrostedSidebar *rn_frostedMenu;
     if (callAppearanceMethods) [self endAppearanceTransition];
 }
 
-- (void)rn_removeFromParentViewControllerCallingAppearanceMethods:(BOOL)callAppearanceMethods {    
+- (void)rn_removeFromParentViewControllerCallingAppearanceMethods:(BOOL)callAppearanceMethods {
     if (callAppearanceMethods) [self beginAppearanceTransition:NO animated:NO];
     [self willMoveToParentViewController:nil];
     [self.view removeFromSuperview];

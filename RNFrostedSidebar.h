@@ -7,7 +7,7 @@
 //
 //  Original Dribbble shot by Jakub Antalik
 //  http://dribbble.com/shots/1194205-Sidebar-calendar-animation
-//  
+//
 
 #import <UIKit/UIKit.h>
 
@@ -15,6 +15,10 @@
 
 @protocol RNFrostedSidebarDelegate <NSObject>
 @optional
+- (void)sidebar:(RNFrostedSidebar *)sidebar willShowOnScreenAnimated:(BOOL)animatedYesOrNo;
+- (void)sidebar:(RNFrostedSidebar *)sidebar didShowOnScreenAnimated:(BOOL)animatedYesOrNo;
+- (void)sidebar:(RNFrostedSidebar *)sidebar willDismissFromScreenAnimated:(BOOL)animatedYesOrNo;
+- (void)sidebar:(RNFrostedSidebar *)sidebar didDismissFromScreenAnimated:(BOOL)animatedYesOrNo;
 - (void)sidebar:(RNFrostedSidebar *)sidebar didTapItemAtIndex:(NSUInteger)index;
 - (void)sidebar:(RNFrostedSidebar *)sidebar didEnable:(BOOL)itemEnabled itemAtIndex:(NSUInteger)index;
 @end
