@@ -62,7 +62,10 @@
 // An optional delegate to respond to interaction events
 @property (nonatomic, weak) id <RNFrostedSidebarDelegate> delegate;
 
-- (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors;
+// An indexSet containing the selected indices
+@property (nonatomic, strong) NSMutableIndexSet *selectedIndices;
+
+- (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors singleSelection:(BOOL)singleSelection;
 - (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices;
 - (instancetype)initWithImages:(NSArray *)images;
 
