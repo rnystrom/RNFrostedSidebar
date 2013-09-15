@@ -238,7 +238,6 @@
 @property (nonatomic, strong) NSArray *images;
 @property (nonatomic, strong) NSArray *borderColors;
 @property (nonatomic, strong) NSMutableArray *itemViews;
-@property (nonatomic, strong) NSMutableIndexSet *selectedIndices;
 
 @end
 
@@ -250,7 +249,7 @@ static RNFrostedSidebar *rn_frostedMenu;
     return rn_frostedMenu;
 }
 
-- (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors {
+- (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors singleSelection:(BOOL)singleSelection {
     if (self = [super init]) {
         _contentView = [[UIScrollView alloc] init];
         _contentView.alwaysBounceHorizontal = NO;
@@ -293,16 +292,19 @@ static RNFrostedSidebar *rn_frostedMenu;
                 view.layer.borderColor = [UIColor clearColor].CGColor;
             }
         }];
+        if(singleSelection) {
+            [self addObserver:self forKeyPath:@"selectedIndices" options:0 context:nil];
+        }
     }
     return self;
 }
 
 - (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices {
-    return [self initWithImages:images selectedIndices:selectedIndices borderColors:nil];
+    return [self initWithImages:images selectedIndices:selectedIndices borderColors:nil singleSelection:NO];
 }
 
 - (instancetype)initWithImages:(NSArray *)images {
-    return [self initWithImages:images selectedIndices:nil borderColors:nil];
+    return [self initWithImages:images selectedIndices:nil borderColors:nil singleSelection:NO];
 }
 
 - (instancetype)init {
@@ -636,6 +638,68 @@ static RNFrostedSidebar *rn_frostedMenu;
     [self.view removeFromSuperview];
     [self removeFromParentViewController];
     if (callAppearanceMethods) [self endAppearanceTransition];
+}
+
+- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if([keyPath isEqualToString:@"selectedIndices"]) {
+        NSIndexSet *indexSet = self.selectedIndices;
+        NSMutableArray *idxToIgnore = [NSMutableArray new];
+        [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+            [idxToIgnore addObject:[NSNumber numberWithInt:idx]];
+            
+            if (self.borderColors) {
+                UIColor *stroke = self.borderColors[idx];
+                UIView *view = self.itemViews[idx];
+                
+                view.layer.borderColor = stroke.CGColor;
+                
+                CABasicAnimation *borderAnimation = [CABasicAnimation animationWithKeyPath:@"borderColor"];
+                borderAnimation.fromValue = (id)[UIColor clearColor].CGColor;
+                borderAnimation.toValue = (id)stroke.CGColor;
+                borderAnimation.duration = 0.5f;
+                [view.layer addAnimation:borderAnimation forKey:nil];
+                
+                CGRect pathFrame = CGRectMake(-CGRectGetMidX(view.bounds), -CGRectGetMidY(view.bounds), view.bounds.size.width, view.bounds.size.height);
+                UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:pathFrame cornerRadius:view.layer.cornerRadius];
+                
+                // accounts for left/right offset and contentOffset of scroll view
+                CGPoint shapePosition = [self.view convertPoint:view.center fromView:self.contentView];
+                
+                CAShapeLayer *circleShape = [CAShapeLayer layer];
+                circleShape.path = path.CGPath;
+                circleShape.position = shapePosition;
+                circleShape.fillColor = [UIColor clearColor].CGColor;
+                circleShape.opacity = 0;
+                circleShape.strokeColor = stroke.CGColor;
+                circleShape.lineWidth = self.borderWidth;
+                
+                [self.view.layer addSublayer:circleShape];
+                
+                CABasicAnimation *scaleAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+                scaleAnimation.fromValue = [NSValue valueWithCATransform3D:CATransform3DIdentity];
+                scaleAnimation.toValue = [NSValue valueWithCATransform3D:CATransform3DMakeScale(2.5, 2.5, 1)];
+                
+                CABasicAnimation *alphaAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+                alphaAnimation.fromValue = @1;
+                alphaAnimation.toValue = @0;
+                
+                CAAnimationGroup *animation = [CAAnimationGroup animation];
+                animation.animations = @[scaleAnimation, alphaAnimation];
+                animation.duration = 0.5f;
+                animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+                [circleShape addAnimation:animation forKey:nil];
+            }
+        }];
+        for (NSInteger i = 0; i < [self.itemViews count]; i++) {
+            for (NSNumber *idxNum in idxToIgnore) {
+                if([idxNum intValue] != i) {
+                    UIView *view = self.itemViews[i];
+                    view.layer.borderColor = [UIColor clearColor].CGColor;
+                }
+            }
+        }
+    }
 }
 
 @end
