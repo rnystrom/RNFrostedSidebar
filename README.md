@@ -5,7 +5,7 @@ Add your own Control Center-esque UI to your app to work as navigation or even t
 
 This project is [another](https://github.com/rnystrom/RNRippleTableView) UI control built after finding some [inspiration](http://dribbble.com/shots/1194205-Sidebar-calendar-animation) on Dribbble. The original design was created by [Jakub Antalik](http://dribbble.com/antalik/click?type=twitter).
 
-For some thoughts on live blur in iOS apps, check out my [blog post](http://whoisryannystrom.com/2013/09/17/Live-blur-in-iOS7/);
+For some thoughts on live blur in iOS apps, check out my [blog post](http://whoisryannystrom.com/2013/09/17/Live-blur-in-iOS7/).
 
 <p align="center"><img title="Open and close animation" src="https://raw.github.com/rnystrom/RNFrostedMenu/master/images/open.gif"/></p>
 
