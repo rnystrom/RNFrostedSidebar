@@ -240,6 +240,7 @@
 @property (nonatomic, strong) UIScrollView *contentView;
 @property (nonatomic, strong) UIImageView *blurView;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
+@property (nonatomic, strong) UISwipeGestureRecognizer *swipeGesture;
 @property (nonatomic, strong) NSArray *images;
 @property (nonatomic, strong) NSArray *borderColors;
 @property (nonatomic, strong) NSMutableArray *itemViews;
@@ -322,6 +323,10 @@ static RNFrostedSidebar *rn_frostedMenu;
     [self.view addSubview:self.contentView];
     self.tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
     [self.view addGestureRecognizer:self.tapGesture];
+  
+  self.swipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+  self.swipeGesture.direction = UISwipeGestureRecognizerDirectionLeft;
+  [self.view addGestureRecognizer:self.swipeGesture];
 }
 
 - (BOOL)shouldAutorotate {
@@ -512,6 +517,9 @@ static RNFrostedSidebar *rn_frostedMenu;
 }
 
 #pragma mark - Gestures
+- (void)handleSwipe:(UISwipeGestureRecognizer *)recognizer {
+  [self dismissAnimated:YES];
+}
 
 - (void)handleTap:(UITapGestureRecognizer *)recognizer {
     CGPoint location = [recognizer locationInView:self.view];
