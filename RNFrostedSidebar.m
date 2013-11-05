@@ -511,6 +511,43 @@ static RNFrostedSidebar *rn_frostedMenu;
     }
 }
 
+- (void)dismissAnimated:(BOOL)animated completion:(void (^)(BOOL status))finish {
+    void (^completion)(BOOL) = ^(BOOL finished){
+        [self rn_removeFromParentViewControllerCallingAppearanceMethods:YES];
+        
+        if ([self.delegate respondsToSelector:@selector(sidebar:didDismissFromScreenAnimated:)]) {
+            [self.delegate sidebar:self didDismissFromScreenAnimated:YES];
+        }
+		finish(finished);
+    };
+    
+    if ([self.delegate respondsToSelector:@selector(sidebar:willDismissFromScreenAnimated:)]) {
+        [self.delegate sidebar:self willDismissFromScreenAnimated:YES];
+    }
+    
+    if (animated) {
+        CGFloat parentWidth = self.view.bounds.size.width;
+        CGRect contentFrame = self.contentView.frame;
+        contentFrame.origin.x = self.showFromRight ? parentWidth : -_width;
+        
+        CGRect blurFrame = self.blurView.frame;
+        blurFrame.origin.x = self.showFromRight ? parentWidth : 0;
+        blurFrame.size.width = 0;
+        
+        [UIView animateWithDuration:self.animationDuration
+                              delay:0
+                            options:UIViewAnimationOptionBeginFromCurrentState
+                         animations:^{
+                             self.contentView.frame = contentFrame;
+                             self.blurView.frame = blurFrame;
+                         }
+                         completion:completion];
+    }
+    else {
+        completion(YES);
+    }
+}
+
 #pragma mark - Gestures
 
 - (void)handleTap:(UITapGestureRecognizer *)recognizer {
