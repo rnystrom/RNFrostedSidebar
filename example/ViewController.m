@@ -62,7 +62,9 @@
 - (void)sidebar:(RNFrostedSidebar *)sidebar didTapItemAtIndex:(NSUInteger)index {
     NSLog(@"Tapped item at index %i",index);
     if (index == 3) {
-        [sidebar dismiss];
+        [sidebar dismissAnimated:YES completion:^(BOOL status) {
+		}];
+		[sidebar dismissViewControllerAnimated:<#(BOOL)#> completion:<#^(void)completion#>];
     }
 }
 

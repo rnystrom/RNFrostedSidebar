@@ -380,7 +380,8 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 - (void)showInViewController:(UIViewController *)controller animated:(BOOL)animated {
     if (rn_frostedMenu != nil) {
-        [rn_frostedMenu dismissAnimated:NO];
+        [rn_frostedMenu dismissAnimated:NO completion:^(BOOL status) {
+		}];
     }
     
     if ([self.delegate respondsToSelector:@selector(sidebar:willShowOnScreenAnimated:)]) {
@@ -471,46 +472,6 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 #pragma mark - Dismiss
 
-- (void)dismiss {
-    [self dismissAnimated:YES];
-}
-
-- (void)dismissAnimated:(BOOL)animated {
-    void (^completion)(BOOL) = ^(BOOL finished){
-        [self rn_removeFromParentViewControllerCallingAppearanceMethods:YES];
-        
-        if ([self.delegate respondsToSelector:@selector(sidebar:didDismissFromScreenAnimated:)]) {
-            [self.delegate sidebar:self didDismissFromScreenAnimated:YES];
-        }
-    };
-    
-    if ([self.delegate respondsToSelector:@selector(sidebar:willDismissFromScreenAnimated:)]) {
-        [self.delegate sidebar:self willDismissFromScreenAnimated:YES];
-    }
-    
-    if (animated) {
-        CGFloat parentWidth = self.view.bounds.size.width;
-        CGRect contentFrame = self.contentView.frame;
-        contentFrame.origin.x = self.showFromRight ? parentWidth : -_width;
-        
-        CGRect blurFrame = self.blurView.frame;
-        blurFrame.origin.x = self.showFromRight ? parentWidth : 0;
-        blurFrame.size.width = 0;
-        
-        [UIView animateWithDuration:self.animationDuration
-                              delay:0
-                            options:UIViewAnimationOptionBeginFromCurrentState
-                         animations:^{
-                             self.contentView.frame = contentFrame;
-                             self.blurView.frame = blurFrame;
-                         }
-                         completion:completion];
-    }
-    else {
-        completion(YES);
-    }
-}
-
 - (void)dismissAnimated:(BOOL)animated completion:(void (^)(BOOL status))finish {
     void (^completion)(BOOL) = ^(BOOL finished){
         [self rn_removeFromParentViewControllerCallingAppearanceMethods:YES];
@@ -553,7 +514,8 @@ static RNFrostedSidebar *rn_frostedMenu;
 - (void)handleTap:(UITapGestureRecognizer *)recognizer {
     CGPoint location = [recognizer locationInView:self.view];
     if (! CGRectContainsPoint(self.contentView.frame, location)) {
-        [self dismissAnimated:YES];
+        [self dismissAnimated:YES completion:^(BOOL status) {
+		}];
     }
     else {
         NSInteger tapIndex = [self indexOfTap:[recognizer locationInView:self.contentView]];
