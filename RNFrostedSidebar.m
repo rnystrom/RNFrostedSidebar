@@ -380,7 +380,7 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 - (void)showInViewController:(UIViewController *)controller animated:(BOOL)animated {
     if (rn_frostedMenu != nil) {
-        [rn_frostedMenu dismissAnimated:NO];
+        [rn_frostedMenu dismissAnimated:NO completion:nil];
     }
     
     if ([self.delegate respondsToSelector:@selector(sidebar:willShowOnScreenAnimated:)]) {
@@ -472,16 +472,23 @@ static RNFrostedSidebar *rn_frostedMenu;
 #pragma mark - Dismiss
 
 - (void)dismiss {
-    [self dismissAnimated:YES];
+    [self dismissAnimated:YES completion:nil];
 }
 
 - (void)dismissAnimated:(BOOL)animated {
-    void (^completion)(BOOL) = ^(BOOL finished){
+    [self dismissAnimated:animated completion:nil];
+}
+
+- (void)dismissAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion {
+    void (^completionBlock)(BOOL) = ^(BOOL finished){
         [self rn_removeFromParentViewControllerCallingAppearanceMethods:YES];
         
         if ([self.delegate respondsToSelector:@selector(sidebar:didDismissFromScreenAnimated:)]) {
             [self.delegate sidebar:self didDismissFromScreenAnimated:YES];
         }
+		if (completion) {
+			completion(finished);
+		}
     };
     
     if ([self.delegate respondsToSelector:@selector(sidebar:willDismissFromScreenAnimated:)]) {
@@ -504,10 +511,10 @@ static RNFrostedSidebar *rn_frostedMenu;
                              self.contentView.frame = contentFrame;
                              self.blurView.frame = blurFrame;
                          }
-                         completion:completion];
+                         completion:completionBlock];
     }
     else {
-        completion(YES);
+        completionBlock(YES);
     }
 }
 
@@ -516,7 +523,7 @@ static RNFrostedSidebar *rn_frostedMenu;
 - (void)handleTap:(UITapGestureRecognizer *)recognizer {
     CGPoint location = [recognizer locationInView:self.view];
     if (! CGRectContainsPoint(self.contentView.frame, location)) {
-        [self dismissAnimated:YES];
+        [self dismissAnimated:YES completion:nil];
     }
     else {
         NSInteger tapIndex = [self indexOfTap:[recognizer locationInView:self.contentView]];

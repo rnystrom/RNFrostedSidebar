@@ -47,6 +47,22 @@ callout.delegate = self;
 [callout show];
 ```
 
+If you use <code>RNFrostedSidebar</code> with a <code>UINavigationController</code>, you can push another <code>UIViewController</code> after selecting a button.
+Simply initialize it in <code>sidebar:didTapItemAtIndex:</code>, then push it onto the navigation stack after dimissing the sidebar with <code>-dismissAnimated:completion:</code>.
+
+```objc
+- (void)sidebar:(RNFrostedSidebar *)sidebar didTapItemAtIndex:(NSUInteger)index {
+    if (index == 1) {
+        [sidebar dismissAnimated:YES completion:^(BOOL finished) {
+            if (finished) {
+                UIViewController *secondVC = [[UIViewController alloc] init];
+                [self.navigationController pushViewController:secondVC animated:YES];
+            }
+        }];
+    }
+}
+```
+
 ## Customization
 
 I've exposed a healthy amount of options for you to customize the appearance and animation of the control.
