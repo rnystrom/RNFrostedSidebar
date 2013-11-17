@@ -11,6 +11,9 @@
 #import "RNFrostedSidebar.h"
 #import <QuartzCore/QuartzCore.h>
 
+NSString *const RNFrostedLabelFont = @"RNFrostedLabelFont";
+NSString *const RNFrostedLabelColor = @"RNFrostedLabelColor";
+
 #pragma mark - Categories
 
 @implementation UIView (rn_Screenshot)
@@ -298,14 +301,16 @@ static RNFrostedSidebar *rn_frostedMenu;
 
             [_itemViews addObject:view];
 			
-			UILabel* label = [[UILabel alloc] init];
-			label.textColor = [UIColor whiteColor];
-			label.font = [UIFont systemFontOfSize:14];
-			label.text = labels[idx];
-			label.backgroundColor = [UIColor clearColor];
-			label.textAlignment = NSTextAlignmentCenter;
-			[_labels addObject:label];
-			[_contentView addSubview:label];
+			if (labels) {
+				UILabel* label = [[UILabel alloc] init];
+				label.textColor = [UIColor whiteColor];
+				label.font = [UIFont systemFontOfSize:14];
+				label.text = labels[idx];
+				label.backgroundColor = [UIColor clearColor];
+				label.textAlignment = NSTextAlignmentCenter;
+				[_labels addObject:label];
+				[_contentView addSubview:label];				
+			}
             
             if (_borderColors && _selectedIndices && [_selectedIndices containsIndex:idx]) {
                 UIColor *color = _borderColors[idx];
@@ -334,6 +339,14 @@ static RNFrostedSidebar *rn_frostedMenu;
 - (instancetype)init {
     NSAssert(NO, @"Unable to create with plain init.");
     return nil;
+}
+
+- (void)setLabelOptions:(NSDictionary*)options
+{
+	[self.labels enumerateObjectsUsingBlock:^(UILabel* label, NSUInteger idx, BOOL *stop) {
+		[label setFont:options[RNFrostedLabelFont]];
+		[label setTextColor:options[RNFrostedLabelColor]];
+	}];
 }
 
 - (void)loadView {
@@ -644,7 +657,7 @@ static RNFrostedSidebar *rn_frostedMenu;
     }];
 
 	[self.labels enumerateObjectsUsingBlock:^(UILabel *label, NSUInteger idx, BOOL *stop) {
-        CGRect frame = CGRectMake(leftPadding, topPadding*idx + self.itemSize.height*(idx+1) + topPadding, self.itemSize.width, 24);
+        CGRect frame = CGRectMake(0, topPadding*idx + self.itemSize.height*(idx+1) + topPadding, self.width, 24);
         label.frame = frame;
     }];
 	

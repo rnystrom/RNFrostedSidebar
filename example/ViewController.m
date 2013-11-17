@@ -66,6 +66,12 @@
     RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors labelStrings:labels];
 //    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors];
 //    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images];
+	
+	[callout setLabelOptions:@{
+							   RNFrostedLabelFont: [UIFont systemFontOfSize:14],
+							   RNFrostedLabelColor: [UIColor whiteColor]
+							   }];
+	
     callout.delegate = self;
 //    callout.showFromRight = YES;
     [callout show];

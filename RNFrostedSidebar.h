@@ -11,6 +11,9 @@
 
 #import <UIKit/UIKit.h>
 
+FOUNDATION_EXPORT NSString *const RNFrostedLabelFont;
+FOUNDATION_EXPORT NSString *const RNFrostedLabelColor;
+
 @class RNFrostedSidebar;
 
 @protocol RNFrostedSidebarDelegate <NSObject>
@@ -81,5 +84,7 @@
 - (void)dismiss;
 - (void)dismissAnimated:(BOOL)animated;
 - (void)dismissAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
+
+- (void)setLabelOptions:(NSDictionary*)options;
 
 @end
