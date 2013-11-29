@@ -75,6 +75,7 @@
 - (void)showInViewController:(UIViewController *)controller animated:(BOOL)animated;
 
 - (void)dismiss;
+- (void)dismissInNavigation;
 - (void)dismissAnimated:(BOOL)animated;
 - (void)dismissAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
 

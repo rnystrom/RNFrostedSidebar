@@ -475,6 +475,11 @@ static RNFrostedSidebar *rn_frostedMenu;
     [self dismissAnimated:YES completion:nil];
 }
 
+- (void)dismissInNavigation {
+    [self removeFromParentViewController];
+    [self dismissAnimated:YES];
+}
+
 - (void)dismissAnimated:(BOOL)animated {
     [self dismissAnimated:animated completion:nil];
 }
