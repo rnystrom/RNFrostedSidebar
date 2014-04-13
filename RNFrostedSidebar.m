@@ -175,7 +175,7 @@
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, assign) NSInteger itemIndex;
 @property (nonatomic, strong) UIColor *originalBackgroundColor;
-
+@property (nonatomic, strong) UILabel *itemLabel;
 @end
 
 @implementation RNCalloutItemView
@@ -185,6 +185,11 @@
         _imageView = [[UIImageView alloc] init];
         _imageView.backgroundColor = [UIColor clearColor];
         _imageView.contentMode = UIViewContentModeScaleAspectFit;
+        _itemLabel=[[UILabel alloc] init];
+        _itemLabel.textAlignment=NSTextAlignmentCenter;
+        _itemLabel.textColor=[UIColor whiteColor];
+        _itemLabel.font=[UIFont  fontWithName:@"HelveticaNeue-UltraLight" size:15];
+     
         [self addSubview:_imageView];
     }
     return self;
@@ -253,6 +258,56 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 + (instancetype)visibleSidebar {
     return rn_frostedMenu;
+}
+- (instancetype)initWithImages:(NSArray *)images menuTexts:(NSArray *) menuTexts selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors {
+    if (self = [super init]) {
+        _isSingleSelect = NO;
+        _contentView = [[UIScrollView alloc] init];
+        _contentView.alwaysBounceHorizontal = NO;
+        _contentView.alwaysBounceVertical = YES;
+        _contentView.bounces = YES;
+        _contentView.clipsToBounds = NO;
+        _contentView.showsHorizontalScrollIndicator = NO;
+        _contentView.showsVerticalScrollIndicator = NO;
+        
+        _width = 150;
+        _animationDuration = 0.25f;
+        _itemSize = CGSizeMake(_width/2, _width/2);
+        _itemViews = [NSMutableArray array];
+        _tintColor = [UIColor colorWithWhite:0.2 alpha:0.73];
+        _borderWidth = 2;
+        _itemBackgroundColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:0.25];
+        
+        if (colors) {
+            NSAssert([colors count] == [images count], @"Border color count must match images count. If you want a blank border, use [UIColor clearColor].");
+        }
+        
+        _selectedIndices = [selectedIndices mutableCopy] ?: [NSMutableIndexSet indexSet];
+        _borderColors = colors;
+        _images = images;
+        
+        [_images enumerateObjectsUsingBlock:^(UIImage *image, NSUInteger idx, BOOL *stop) {
+            RNCalloutItemView *view = [[RNCalloutItemView alloc] init];
+            view.itemIndex = idx;
+            view.clipsToBounds = YES;
+            view.imageView.image = image;
+            view.itemLabel.text=menuTexts[idx];
+            [_contentView addSubview:view];
+            
+            [_contentView addSubview:view.itemLabel];
+            
+            [_itemViews addObject:view];
+            
+            if (_borderColors && _selectedIndices && [_selectedIndices containsIndex:idx]) {
+                UIColor *color = _borderColors[idx];
+                view.layer.borderColor = color.CGColor;
+            }
+            else {
+                view.layer.borderColor = [UIColor clearColor].CGColor;
+            }
+        }];
+    }
+    return self;
 }
 
 - (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors {
@@ -621,6 +676,7 @@ static RNFrostedSidebar *rn_frostedMenu;
         CGRect frame = CGRectMake(leftPadding, topPadding*idx + self.itemSize.height*idx + topPadding, self.itemSize.width, self.itemSize.height);
         view.frame = frame;
         view.layer.cornerRadius = frame.size.width/2.f;
+        view.itemLabel.frame=CGRectMake(leftPadding, topPadding*idx + self.itemSize.height*idx + topPadding+74, self.itemSize.width, 20);
     }];
     
     NSInteger items = [self.itemViews count];
