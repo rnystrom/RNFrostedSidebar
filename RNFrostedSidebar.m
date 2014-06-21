@@ -188,7 +188,7 @@
         _itemLabel=[[UILabel alloc] init];
         _itemLabel.textAlignment=NSTextAlignmentCenter;
         _itemLabel.textColor=[UIColor whiteColor];
-        _itemLabel.font=[UIFont  fontWithName:@"HelveticaNeue" size:15];
+        _itemLabel.font=[UIFont fontWithName:@"HelveticaNeue" size:15];
      
         [self addSubview:_imageView];
     }
@@ -259,7 +259,7 @@ static RNFrostedSidebar *rn_frostedMenu;
 + (instancetype)visibleSidebar {
     return rn_frostedMenu;
 }
-- (instancetype)initWithImages:(NSArray *)images menuTexts:(NSArray *) menuTexts selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors {
+- (instancetype)initWithImages:(NSArray *)images menuTexts:(NSArray *) menuTexts menuTextFont:(UIFont *) font selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors {
     if (self = [super init]) {
         _isSingleSelect = NO;
         _contentView = [[UIScrollView alloc] init];
@@ -292,6 +292,7 @@ static RNFrostedSidebar *rn_frostedMenu;
             view.clipsToBounds = YES;
             view.imageView.image = image;
             view.itemLabel.text=menuTexts[idx];
+            view.itemLabel.font=font;
             [_contentView addSubview:view];
             
             [_contentView addSubview:view.itemLabel];
