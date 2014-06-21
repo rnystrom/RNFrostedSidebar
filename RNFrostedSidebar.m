@@ -188,7 +188,7 @@
         _itemLabel=[[UILabel alloc] init];
         _itemLabel.textAlignment=NSTextAlignmentCenter;
         _itemLabel.textColor=[UIColor whiteColor];
-        _itemLabel.font=[UIFont  fontWithName:@"HelveticaNeue-UltraLight" size:15];
+        _itemLabel.font=[UIFont  fontWithName:@"HelveticaNeue" size:15];
      
         [self addSubview:_imageView];
     }
