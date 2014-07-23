@@ -27,6 +27,9 @@
 
 + (instancetype)visibleSidebar;
 
+// The actual views
+@property (nonatomic, strong) NSMutableArray *itemViews;
+
 // The width of the sidebar
 // Default 150
 @property (nonatomic, assign) CGFloat width;
