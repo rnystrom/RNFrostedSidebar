@@ -23,6 +23,7 @@ FOUNDATION_EXPORT NSString *const RNFrostedLabelColor;
 - (void)sidebar:(RNFrostedSidebar *)sidebar willDismissFromScreenAnimated:(BOOL)animatedYesOrNo;
 - (void)sidebar:(RNFrostedSidebar *)sidebar didDismissFromScreenAnimated:(BOOL)animatedYesOrNo;
 - (void)sidebar:(RNFrostedSidebar *)sidebar didTapItemAtIndex:(NSUInteger)index;
+- (BOOL)sidebar:(RNFrostedSidebar *)sidebar shouldTapItemAtIndex:(NSUInteger)index;
 - (void)sidebar:(RNFrostedSidebar *)sidebar didEnable:(BOOL)itemEnabled itemAtIndex:(NSUInteger)index;
 @end
 
@@ -30,7 +31,10 @@ FOUNDATION_EXPORT NSString *const RNFrostedLabelColor;
 
 + (instancetype)visibleSidebar;
 
-// The actual views
+// Just the actual views
+@property (nonatomic, readonly) NSArray *views;
+
+// Backwards compatibility
 @property (nonatomic, strong) NSMutableArray *itemViews;
 
 // The width of the sidebar

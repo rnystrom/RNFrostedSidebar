@@ -99,9 +99,9 @@ NSString *const RNFrostedLabelColor = @"RNFrostedLabelColor";
             if (radius % 2 != 1) {
                 radius += 1; // force radius to be odd so that the three box-blur methodology works.
             }
-            vImageBoxConvolve_ARGB8888(&effectInBuffer, &effectOutBuffer, NULL, 0, 0, radius, radius, 0, kvImageEdgeExtend);
-            vImageBoxConvolve_ARGB8888(&effectOutBuffer, &effectInBuffer, NULL, 0, 0, radius, radius, 0, kvImageEdgeExtend);
-            vImageBoxConvolve_ARGB8888(&effectInBuffer, &effectOutBuffer, NULL, 0, 0, radius, radius, 0, kvImageEdgeExtend);
+            vImageBoxConvolve_ARGB8888(&effectInBuffer, &effectOutBuffer, NULL, 0, 0, (unsigned)radius, (unsigned)radius, 0, kvImageEdgeExtend);
+            vImageBoxConvolve_ARGB8888(&effectOutBuffer, &effectInBuffer, NULL, 0, 0, (unsigned)radius, (unsigned)radius, 0, kvImageEdgeExtend);
+            vImageBoxConvolve_ARGB8888(&effectInBuffer, &effectOutBuffer, NULL, 0, 0, (unsigned)radius, (unsigned)radius, 0, kvImageEdgeExtend);
         }
         BOOL effectImageBuffersAreSwapped = NO;
         if (hasSaturationChange) {
@@ -209,8 +209,8 @@ NSString *const RNFrostedLabelColor = @"RNFrostedLabelColor";
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     [super touchesBegan:touches withEvent:event];
     
-    float r, g, b, a;
-    float darkenFactor = 0.3f;
+    CGFloat r, g, b, a;
+    CGFloat darkenFactor = 0.3f;
     UIColor *darkerColor;
     if ([self.originalBackgroundColor getRed:&r green:&g blue:&b alpha:&a]) {
         darkerColor = [UIColor colorWithRed:MAX(r - darkenFactor, 0.0) green:MAX(g - darkenFactor, 0.0) blue:MAX(b - darkenFactor, 0.0) alpha:a];
@@ -256,6 +256,21 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 + (instancetype)visibleSidebar {
     return rn_frostedMenu;
+}
+
+- (NSArray *)itemViews {
+    const SEL selector = NSSelectorFromString(@"originalBackgroundColor");
+    NSMutableArray *result = [[NSMutableArray alloc] init];
+    for (UIView *view in self.view.subviews) {
+        if ([view.class isSubclassOfClass:UIScrollView.class]) {
+            for (UIView *individualView in view.subviews) {
+                if ([individualView respondsToSelector:selector]) {
+                    [result addObject:individualView];
+                }
+            }
+        }
+    }
+    return result.copy;
 }
 
 - (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors labelStrings:(NSArray*)labels
@@ -561,12 +576,26 @@ static RNFrostedSidebar *rn_frostedMenu;
     else {
         NSInteger tapIndex = [self indexOfTap:[recognizer locationInView:self.contentView]];
         if (tapIndex != NSNotFound) {
-            [self didTapItemAtIndex:tapIndex];
+            [self tryTapItemAtIndex:tapIndex];
         }
     }
 }
 
 #pragma mark - Private
+
+- (void)tryTapItemAtIndex:(NSUInteger)index {
+    BOOL canTap = (self.isSingleSelect)
+        ? ! [self.selectedIndices containsIndex:index]
+        : YES;
+    
+    if (canTap && [self.delegate respondsToSelector:@selector(sidebar:didTapItemAtIndex:)]) {
+        canTap &= [self.delegate sidebar:self shouldTapItemAtIndex:index];
+    }
+    
+    if (canTap) {
+        [self didTapItemAtIndex:index];
+    }
+}
 
 - (void)didTapItemAtIndex:(NSUInteger)index {
     BOOL didEnable = ! [self.selectedIndices containsIndex:index];

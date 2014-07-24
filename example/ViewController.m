@@ -80,7 +80,7 @@
 #pragma mark - RNFrostedSidebarDelegate
 
 - (void)sidebar:(RNFrostedSidebar *)sidebar didTapItemAtIndex:(NSUInteger)index {
-    NSLog(@"Tapped item at index %i",index);
+    NSLog(@"Tapped item at index %lu",(long)index);
     if (index == 3) {
         [sidebar dismissAnimated:YES completion:nil];
     }
