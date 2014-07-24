@@ -21,9 +21,11 @@ NSString *const RNFrostedLabelColor = @"RNFrostedLabelColor";
 - (UIImage *)rn_screenshot {
     UIGraphicsBeginImageContext(self.bounds.size);
     if([self respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)]){
-        [self drawViewHierarchyInRect:self.bounds afterScreenUpdates:NO];
-    }
-    else{
+        if (![self drawViewHierarchyInRect:self.bounds afterScreenUpdates:NO]) {
+            [NSException raise:@"" format:@"RNFrostedSidebar: unable to drawViewHierarchyInRect!"];
+        }
+    } else {
+        // Important: The OS X v10.5 implementation of this method does not support the entire Core Animation composition model.
         [self.layer renderInContext:UIGraphicsGetCurrentContext()];
     }
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
@@ -178,17 +180,22 @@ NSString *const RNFrostedLabelColor = @"RNFrostedLabelColor";
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, assign) NSInteger itemIndex;
 @property (nonatomic, strong) UIColor *originalBackgroundColor;
-
 @end
 
 @implementation RNCalloutItemView
 
+- (UIImageView *)imageView {
+    if (!_imageView) {
+        _imageView = [[UIImageView alloc] init];
+        _imageView.backgroundColor = UIColor.clearColor;
+        _imageView.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    return _imageView;
+}
+
 - (instancetype)init {
     if (self = [super init]) {
-        _imageView = [[UIImageView alloc] init];
-        _imageView.backgroundColor = [UIColor clearColor];
-        _imageView.contentMode = UIViewContentModeScaleAspectFit;
-        [self addSubview:_imageView];
+        [self addSubview:self.imageView];
     }
     return self;
 }
@@ -214,11 +221,9 @@ NSString *const RNFrostedLabelColor = @"RNFrostedLabelColor";
     UIColor *darkerColor;
     if ([self.originalBackgroundColor getRed:&r green:&g blue:&b alpha:&a]) {
         darkerColor = [UIColor colorWithRed:MAX(r - darkenFactor, 0.0) green:MAX(g - darkenFactor, 0.0) blue:MAX(b - darkenFactor, 0.0) alpha:a];
-    }
-    else if ([self.originalBackgroundColor getWhite:&r alpha:&a]) {
+    } else if ([self.originalBackgroundColor getWhite:&r alpha:&a]) {
         darkerColor = [UIColor colorWithWhite:MAX(r - darkenFactor, 0.0) alpha:a];
-    }
-    else {
+    } else {
         @throw @"Item color should be RGBA or White/Alpha in order to darken the button color.";
     }
     self.backgroundColor = darkerColor;
@@ -243,22 +248,25 @@ NSString *const RNFrostedLabelColor = @"RNFrostedLabelColor";
 @property (nonatomic, strong) UIScrollView *contentView;
 @property (nonatomic, strong) UIImageView *blurView;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
-@property (nonatomic, strong) NSArray *images;
-@property (nonatomic, strong) NSMutableArray *labels;
-@property (nonatomic, strong) NSArray *borderColors;
+@property (nonatomic, copy)   NSArray *images;
+@property (nonatomic, copy)   NSArray *labels;
+@property (nonatomic, copy)   NSArray *borderColors;
 @property (nonatomic, strong) NSMutableIndexSet *selectedIndices;
-
+@property (nonatomic, strong, readonly) UIImage *blurImage;
 @end
 
 static RNFrostedSidebar *rn_frostedMenu;
 
 @implementation RNFrostedSidebar
+@synthesize blurImage = _blurImage;
 
 + (instancetype)visibleSidebar {
     return rn_frostedMenu;
 }
 
-- (NSArray *)itemViews {
+#pragma mark - Getters
+
+- (NSArray *)views {
     const SEL selector = NSSelectorFromString(@"originalBackgroundColor");
     NSMutableArray *result = [[NSMutableArray alloc] init];
     for (UIView *view in self.view.subviews) {
@@ -273,10 +281,15 @@ static RNFrostedSidebar *rn_frostedMenu;
     return result.copy;
 }
 
-- (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors labelStrings:(NSArray*)labels
-{
-    if (self = [super init]) {
-        _isSingleSelect = NO;
+- (NSMutableIndexSet *)selectedIndices {
+    if (!_selectedIndices) {
+        _selectedIndices = [[NSMutableIndexSet alloc] init];
+    }
+    return _selectedIndices;
+}
+
+- (UIScrollView *)contentView {
+    if (!_contentView) {
         _contentView = [[UIScrollView alloc] init];
         _contentView.alwaysBounceHorizontal = NO;
         _contentView.alwaysBounceVertical = YES;
@@ -284,57 +297,89 @@ static RNFrostedSidebar *rn_frostedMenu;
         _contentView.clipsToBounds = NO;
         _contentView.showsHorizontalScrollIndicator = NO;
         _contentView.showsVerticalScrollIndicator = NO;
-        
-        _width = 150;
-        _animationDuration = 0.25f;
-        _itemSize = CGSizeMake(_width/2, _width/2);
-        _itemViews = [NSMutableArray array];
+    }
+    return _contentView;
+}
+
+- (NSMutableArray *)itemViews {
+    if (!_itemViews) {
+        _itemViews = [[NSMutableArray alloc] init];
+    }
+    return _itemViews;
+}
+
+- (NSArray *)labels {
+    if (!_labels) {
+        _labels = @[];
+    }
+    return _labels;
+}
+
+- (UIColor *)tintColor {
+    if (!_tintColor) {
         _tintColor = [UIColor colorWithWhite:0.2 alpha:0.73];
-		_labels = [@[] mutableCopy];
-        _borderWidth = 2;
+    }
+    return _tintColor;
+}
+
+- (UIColor *)itemBackgroundColor {
+    if (!_itemBackgroundColor) {
         _itemBackgroundColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:0.25];
+    }
+    return _itemBackgroundColor;
+}
+
+#pragma mark - Constructors
+
+- (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors labelStrings:(NSArray*)labels
+{
+    if (self = [super init]) {
+        self.isSingleSelect = NO;
         
-        if (colors) {
-            NSAssert([colors count] == [images count], @"Border color count must match images count. If you want a blank border, use [UIColor clearColor].");
-        }
-		
-		if (labels) {
-            NSAssert([labels count] == [images count], @"Label count must match images count. If you don't want a labeled button, use @\"\"");
-        }
+        self.width = 150;
+        self.animationDuration = 0.25f;
+        self.itemSize = CGSizeMake(_width/2, _width/2);
         
-        _selectedIndices = [selectedIndices mutableCopy] ?: [NSMutableIndexSet indexSet];
-        _borderColors = colors;
-        _images = images;
+        self.borderWidth = 2;
         
-        [_images enumerateObjectsUsingBlock:^(UIImage *image, NSUInteger idx, BOOL *stop) {
+        NSAssert(labels.count == images.count, @"Label count must match images count. If you don't want a labeled button, use @\"\"  If you want a blank border, use UIColor.clearColor.");
+        
+        self.selectedIndices = selectedIndices.mutableCopy;
+        self.borderColors = colors;
+        self.images = images;
+        
+        NSMutableArray *labelsArray = [[NSMutableArray alloc] init];
+        
+        [self.images enumerateObjectsUsingBlock:^(UIImage *image, NSUInteger idx, BOOL *stop) {
             RNCalloutItemView *view = [[RNCalloutItemView alloc] init];
             view.itemIndex = idx;
             view.clipsToBounds = YES;
             view.imageView.image = image;
 
-            [_contentView addSubview:view];
+            [self.contentView addSubview:view];
 
-            [_itemViews addObject:view];
+            [self.itemViews addObject:view];
 			
 			if (labels) {
 				UILabel* label = [[UILabel alloc] init];
-				label.textColor = [UIColor whiteColor];
+				label.textColor = UIColor.whiteColor;
 				label.font = [UIFont systemFontOfSize:14];
 				label.text = labels[idx];
-				label.backgroundColor = [UIColor clearColor];
+				label.backgroundColor = UIColor.clearColor;
 				label.textAlignment = NSTextAlignmentCenter;
-				[_labels addObject:label];
-				[_contentView addSubview:label];				
+				[labelsArray addObject:label];
+				[self.contentView addSubview:label];
 			}
             
-            if (_borderColors && _selectedIndices && [_selectedIndices containsIndex:idx]) {
-                UIColor *color = _borderColors[idx];
-                view.layer.borderColor = color.CGColor;
-            }
-            else {
-                view.layer.borderColor = [UIColor clearColor].CGColor;
-            }
+            UIColor *borderColor = (self.borderColors && [self.selectedIndices containsIndex:idx])
+                ? self.borderColors[idx]
+                : UIColor.clearColor;
+            view.layer.borderColor = borderColor.CGColor;
         }];
+        
+        self.labels = labelsArray;
+        
+        rn_frostedMenu = self;
     }
     return self;
 }
@@ -356,6 +401,8 @@ static RNFrostedSidebar *rn_frostedMenu;
     return nil;
 }
 
+#pragma mark - Setters
+
 - (void)setLabelOptions:(NSDictionary*)options
 {
 	[self.labels enumerateObjectsUsingBlock:^(UILabel* label, NSUInteger idx, BOOL *stop) {
@@ -366,7 +413,7 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 - (void)loadView {
     [super loadView];
-    self.view.backgroundColor = [UIColor clearColor];
+    self.view.backgroundColor = UIColor.clearColor;
     [self.view addSubview:self.contentView];
     self.tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
     [self.view addGestureRecognizer:self.tapGesture];
@@ -380,18 +427,37 @@ static RNFrostedSidebar *rn_frostedMenu;
     return UIInterfaceOrientationMaskAll;
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
-    
-    if ([self isViewLoaded] && self.view.window != nil) {
+- (void) blurImageNeedsUpdate {
+    if (self.isViewLoaded && self.view.window) {
         self.view.alpha = 0;
-        UIImage *blurImage = [self.parentViewController.view rn_screenshot];
-        blurImage = [blurImage applyBlurWithRadius:5 tintColor:self.tintColor saturationDeltaFactor:1.8 maskImage:nil];
-        self.blurView.image = blurImage;
-        self.view.alpha = 1;
+        self.blurView.alpha = 0;
         
-        [self layoutSubviews];
+        self.blurView.frame = self.contentView.frame;
+        _blurImage = nil;
+        self.blurView.image = self.blurImage;
+
+        [UIView animateWithDuration:1.0 animations:^{
+            self.view.alpha = 1;
+            self.blurView.alpha = 1;
+        }];
+        
+        //   [self layoutSubviews];
+        //   [self blurImageNeedsUpdate];
     }
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    [self blurImageNeedsUpdate];
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    self.view.alpha = 0;
+    self.blurView.alpha = 0;
+    
+    [self layoutSubviews];
 }
 
 #pragma mark - Show
@@ -426,19 +492,20 @@ static RNFrostedSidebar *rn_frostedMenu;
                      }];
 }
 
-- (void)showInViewController:(UIViewController *)controller animated:(BOOL)animated {
-    if (rn_frostedMenu != nil) {
-        [rn_frostedMenu dismissAnimated:NO completion:nil];
+- (UIImage *) blurImage {
+    if (!_blurImage) {
+        UIImage *blurImage = [self.parentViewController.view rn_screenshot];
+        _blurImage = [blurImage applyBlurWithRadius:5 tintColor:self.tintColor saturationDeltaFactor:1.8 maskImage:nil];
     }
+    return _blurImage;
+}
+
+- (void)showInViewController:(UIViewController *)controller animated:(BOOL)animated {
+    [rn_frostedMenu dismissAnimated:NO completion:nil];
     
     if ([self.delegate respondsToSelector:@selector(sidebar:willShowOnScreenAnimated:)]) {
         [self.delegate sidebar:self willShowOnScreenAnimated:animated];
     }
-    
-    rn_frostedMenu = self;
-    
-    UIImage *blurImage = [controller.view rn_screenshot];
-    blurImage = [blurImage applyBlurWithRadius:5 tintColor:self.tintColor saturationDeltaFactor:1.8 maskImage:nil];
     
     [self rn_addToParentViewController:controller callingAppearanceMethods:YES];
     self.view.frame = controller.view.bounds;
@@ -446,23 +513,31 @@ static RNFrostedSidebar *rn_frostedMenu;
     CGFloat parentWidth = self.view.bounds.size.width;
     
     CGRect contentFrame = self.view.bounds;
-    contentFrame.origin.x = _showFromRight ? parentWidth : -_width;
-    contentFrame.size.width = _width;
+    contentFrame.origin.x = (self.showFromRight) ? parentWidth
+    : -self.width;
+    contentFrame.size.width = self.width;
     self.contentView.frame = contentFrame;
     
     [self layoutItems];
     
-    CGRect blurFrame = CGRectMake(_showFromRight ? self.view.bounds.size.width : 0, 0, 0, self.view.bounds.size.height);
+    CGRect blurFrame = CGRectMake((_showFromRight) ? self.view.bounds.size.width
+                                                   : 0,
+                                  0,
+                                  0,
+                                  self.view.bounds.size.height);
     
-    self.blurView = [[UIImageView alloc] initWithImage:blurImage];
+    [self.blurView removeFromSuperview];
+    self.blurView = [[UIImageView alloc] initWithImage:self.blurImage];
     self.blurView.frame = blurFrame;
-    self.blurView.contentMode = _showFromRight ? UIViewContentModeTopRight : UIViewContentModeTopLeft;
+    self.blurView.contentMode = (self.showFromRight) ? UIViewContentModeTopRight
+                                                     : UIViewContentModeTopLeft;
     self.blurView.clipsToBounds = YES;
     [self.view insertSubview:self.blurView belowSubview:self.contentView];
     
-    contentFrame.origin.x = _showFromRight ? parentWidth - _width : 0;
+    contentFrame.origin.x = (self.showFromRight) ? parentWidth - self.width
+                                                 : 0;
     blurFrame.origin.x = contentFrame.origin.x;
-    blurFrame.size.width = _width;
+    blurFrame.size.width = self.width;
     
     void (^animations)() = ^{
         self.contentView.frame = contentFrame;
@@ -480,8 +555,7 @@ static RNFrostedSidebar *rn_frostedMenu;
                             options:kNilOptions
                          animations:animations
                          completion:completion];
-    }
-    else{
+    } else {
         animations();
         completion(YES);
     }
@@ -498,16 +572,16 @@ static RNFrostedSidebar *rn_frostedMenu;
         
         if (sdkHasSpringAnimation) {
             [self animateSpringWithView:view idx:idx initDelay:initDelay];
-        }
-        else {
+        } else {
             [self animateFauxBounceWithView:view idx:idx initDelay:initDelay];
         }
     }];
 }
 
+
 - (void)showAnimated:(BOOL)animated {
     UIViewController *controller = [UIApplication sharedApplication].keyWindow.rootViewController;
-    while (controller.presentedViewController != nil) {
+    while (controller.presentedViewController) {
         controller = controller.presentedViewController;
     }
     [self showInViewController:controller animated:animated];
@@ -546,10 +620,12 @@ static RNFrostedSidebar *rn_frostedMenu;
     if (animated) {
         CGFloat parentWidth = self.view.bounds.size.width;
         CGRect contentFrame = self.contentView.frame;
-        contentFrame.origin.x = self.showFromRight ? parentWidth : -_width;
+        contentFrame.origin.x = (self.showFromRight) ? parentWidth
+                                                     : -_width;
         
         CGRect blurFrame = self.blurView.frame;
-        blurFrame.origin.x = self.showFromRight ? parentWidth : 0;
+        blurFrame.origin.x = (self.showFromRight) ? parentWidth
+                                                  : 0;
         blurFrame.size.width = 0;
         
         [UIView animateWithDuration:self.animationDuration
@@ -609,7 +685,7 @@ static RNFrostedSidebar *rn_frostedMenu;
         UIView *view = self.itemViews[index];
         
         if (didEnable) {
-            if (_isSingleSelect){
+            if (_isSingleSelect) {
                 [self.selectedIndices removeAllIndexes];
                 [self.itemViews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
                     UIView *aView = (UIView *)obj;
@@ -625,9 +701,8 @@ static RNFrostedSidebar *rn_frostedMenu;
             [view.layer addAnimation:borderAnimation forKey:nil];
             
             [self.selectedIndices addIndex:index];
-        }
-        else {
-            if (!_isSingleSelect){
+        } else {
+            if (!_isSingleSelect) {
                 view.layer.borderColor = [UIColor clearColor].CGColor;
                 [self.selectedIndices removeIndex:index];
             }
@@ -673,8 +748,9 @@ static RNFrostedSidebar *rn_frostedMenu;
 }
 
 - (void)layoutSubviews {
-    CGFloat x = self.showFromRight ? self.parentViewController.view.bounds.size.width - _width : 0;
-    self.contentView.frame = CGRectMake(x, 0, _width, self.parentViewController.view.bounds.size.height);
+    CGFloat x = (self.showFromRight) ? self.parentViewController.view.bounds.size.width - self.width
+                                     : 0;
+    self.contentView.frame = CGRectMake(x, 0, self.width, self.parentViewController.view.bounds.size.height);
     self.blurView.frame = self.contentView.frame;
     
     [self layoutItems];
@@ -712,23 +788,31 @@ static RNFrostedSidebar *rn_frostedMenu;
 }
 
 - (void)rn_addToParentViewController:(UIViewController *)parentViewController callingAppearanceMethods:(BOOL)callAppearanceMethods {
-    if (self.parentViewController != nil) {
+    if (self.parentViewController) {
         [self rn_removeFromParentViewControllerCallingAppearanceMethods:callAppearanceMethods];
     }
     
-    if (callAppearanceMethods) [self beginAppearanceTransition:YES animated:NO];
+    if (callAppearanceMethods) {
+        [self beginAppearanceTransition:YES animated:NO];
+    }
     [parentViewController addChildViewController:self];
     [parentViewController.view addSubview:self.view];
     [self didMoveToParentViewController:self];
-    if (callAppearanceMethods) [self endAppearanceTransition];
+    if (callAppearanceMethods) {
+        [self endAppearanceTransition];
+    }
 }
 
 - (void)rn_removeFromParentViewControllerCallingAppearanceMethods:(BOOL)callAppearanceMethods {
-    if (callAppearanceMethods) [self beginAppearanceTransition:NO animated:NO];
+    if (callAppearanceMethods) {
+        [self beginAppearanceTransition:NO animated:NO];
+    }
     [self willMoveToParentViewController:nil];
     [self.view removeFromSuperview];
     [self removeFromParentViewController];
-    if (callAppearanceMethods) [self endAppearanceTransition];
+    if (callAppearanceMethods) {
+        [self endAppearanceTransition];
+    }
 }
 
 @end

@@ -34,6 +34,8 @@
 		8681BB5917BAFB5A007F1B43 /* RNFrostedSidebar.m in Sources */ = {isa = PBXBuildFile; fileRef = 8681BB5817BAFB5A007F1B43 /* RNFrostedSidebar.m */; };
 		86D2CBF917CEAFE50098397C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 862D1B2317BC2C9B00157004 /* QuartzCore.framework */; };
 		86D2CBFA17CEAFE90098397C /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 862D1B2517BC2CA000157004 /* Accelerate.framework */; };
+		94EB590719818A6F00E17200 /* Reveal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94EB590619818A6F00E17200 /* Reveal.framework */; };
+		94EB590919818A8400E17200 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94EB590819818A8400E17200 /* CFNetwork.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -71,6 +73,8 @@
 		8646017917BAF99800FCE7F4 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		8681BB5717BAFB5A007F1B43 /* RNFrostedSidebar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNFrostedSidebar.h; sourceTree = "<group>"; };
 		8681BB5817BAFB5A007F1B43 /* RNFrostedSidebar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNFrostedSidebar.m; sourceTree = "<group>"; };
+		94EB590619818A6F00E17200 /* Reveal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Reveal.framework; path = "../../../../../Applications/Reveal.app/Contents/SharedSupport/iOS-Libraries/Reveal.framework"; sourceTree = "<group>"; };
+		94EB590819818A8400E17200 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,9 +82,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94EB590919818A8400E17200 /* CFNetwork.framework in Frameworks */,
 				86D2CBFA17CEAFE90098397C /* Accelerate.framework in Frameworks */,
 				86D2CBF917CEAFE50098397C /* QuartzCore.framework in Frameworks */,
 				8646016317BAF99800FCE7F4 /* CoreGraphics.framework in Frameworks */,
+				94EB590719818A6F00E17200 /* Reveal.framework in Frameworks */,
 				8646016517BAF99800FCE7F4 /* UIKit.framework in Frameworks */,
 				8646016117BAF99800FCE7F4 /* Foundation.framework in Frameworks */,
 			);
@@ -124,6 +130,7 @@
 		8646015417BAF99800FCE7F4 = {
 			isa = PBXGroup;
 			children = (
+				94EB590619818A6F00E17200 /* Reveal.framework */,
 				86251D3917C3DE9E00837EBD /* example */,
 				8646015F17BAF99800FCE7F4 /* Frameworks */,
 				8646015E17BAF99800FCE7F4 /* Products */,
@@ -143,6 +150,7 @@
 		8646015F17BAF99800FCE7F4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				94EB590819818A8400E17200 /* CFNetwork.framework */,
 				862D1B2517BC2CA000157004 /* Accelerate.framework */,
 				862D1B2317BC2C9B00157004 /* QuartzCore.framework */,
 				8646016017BAF99800FCE7F4 /* Foundation.framework */,
@@ -287,6 +295,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-ObjC";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -318,6 +327,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				OTHER_LDFLAGS = "-ObjC";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -329,6 +339,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_APPS_DIR)/Reveal.app/Contents/SharedSupport/iOS-Libraries",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "example/RNFrostedSidebar-Prefix.pch";
 				INFOPLIST_FILE = "example/RNFrostedSidebar-Info.plist";
@@ -343,6 +357,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_APPS_DIR)/Reveal.app/Contents/SharedSupport/iOS-Libraries",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "example/RNFrostedSidebar-Prefix.pch";
 				INFOPLIST_FILE = "example/RNFrostedSidebar-Info.plist";
