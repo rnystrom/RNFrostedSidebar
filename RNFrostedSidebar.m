@@ -584,15 +584,19 @@ static RNFrostedSidebar *rn_frostedMenu;
 #pragma mark - Private
 
 - (void)tryTapItemAtIndex:(NSUInteger)index {
-    BOOL canTap = (self.isSingleSelect)
-        ? ! [self.selectedIndices containsIndex:index]
-        : YES;
+    BOOL needsTap = YES;
     
-    if (canTap && [self.delegate respondsToSelector:@selector(sidebar:shouldTapItemAtIndex:)]) {
-        canTap &= [self.delegate sidebar:self shouldTapItemAtIndex:index];
+    // if isSingleSelect and already selected, dont tap again.
+    if (self.isSingleSelect) {
+        needsTap &= ! [self.selectedIndices containsIndex:index];
+    }
+
+    // if the delegate says we shouldn't tap, it's authoritative.
+    if ([self.delegate respondsToSelector:@selector(sidebar:shouldTapItemAtIndex:)]) {
+        needsTap &= [self.delegate sidebar:self shouldTapItemAtIndex:index];
     }
     
-    if (canTap) {
+    if (needsTap) {
         [self didTapItemAtIndex:index];
     }
 }
