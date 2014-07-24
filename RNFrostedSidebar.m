@@ -588,7 +588,7 @@ static RNFrostedSidebar *rn_frostedMenu;
         ? ! [self.selectedIndices containsIndex:index]
         : YES;
     
-    if (canTap && [self.delegate respondsToSelector:@selector(sidebar:didTapItemAtIndex:)]) {
+    if (canTap && [self.delegate respondsToSelector:@selector(sidebar:shouldTapItemAtIndex:)]) {
         canTap &= [self.delegate sidebar:self shouldTapItemAtIndex:index];
     }
     
