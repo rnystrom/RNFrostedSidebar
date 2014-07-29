@@ -527,6 +527,13 @@ static RNFrostedSidebar *rn_frostedMenu;
                                   self.view.bounds.size.height);
     
     [self.blurView removeFromSuperview];
+
+    // if blurImage is not the right size for the blurFrame, invalid it
+    if (self.blurImage.size.height != blurFrame.size.height
+     || self.blurImage.size.width != blurFrame.size.width) {
+        _blurImage = nil;
+    }
+    
     self.blurView = [[UIImageView alloc] initWithImage:self.blurImage];
     self.blurView.frame = blurFrame;
     self.blurView.contentMode = (self.showFromRight) ? UIViewContentModeTopRight
