@@ -49,8 +49,20 @@
                         [UIColor colorWithRed:126/255.f green:242/255.f blue:195/255.f alpha:1],
                         [UIColor colorWithRed:119/255.f green:152/255.f blue:255/255.f alpha:1],
                         ];
-    
-    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors];
+    NSArray *titles = @[@"title1",
+                        @"title2",
+                        @"title3",
+                        @"title4",
+                        @"title5",
+                        @"title6",
+                        @"title7",
+                        @"title8",
+                        @"title9",
+                        @"title10",
+                        @"title11",
+                        @"title12",
+                        ];
+    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors titles:titles];
 //    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images];
     callout.delegate = self;
 //    callout.showFromRight = YES;
