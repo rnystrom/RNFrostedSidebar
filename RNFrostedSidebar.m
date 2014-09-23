@@ -96,9 +96,10 @@
             if (radius % 2 != 1) {
                 radius += 1; // force radius to be odd so that the three box-blur methodology works.
             }
-            vImageBoxConvolve_ARGB8888(&effectInBuffer, &effectOutBuffer, NULL, 0, 0, radius, radius, 0, kvImageEdgeExtend);
-            vImageBoxConvolve_ARGB8888(&effectOutBuffer, &effectInBuffer, NULL, 0, 0, radius, radius, 0, kvImageEdgeExtend);
-            vImageBoxConvolve_ARGB8888(&effectInBuffer, &effectOutBuffer, NULL, 0, 0, radius, radius, 0, kvImageEdgeExtend);
+            vImageBoxConvolve_ARGB8888(&effectInBuffer, &effectOutBuffer, NULL, 0, 0, (uint32_t)radius, (uint32_t)radius, 0, kvImageEdgeExtend);
+            vImageBoxConvolve_ARGB8888(&effectOutBuffer, &effectInBuffer, NULL, 0, 0, (uint32_t)radius, (uint32_t)radius, 0, kvImageEdgeExtend);
+            vImageBoxConvolve_ARGB8888(&effectInBuffer, &effectOutBuffer, NULL, 0, 0, (uint32_t)radius, (uint32_t)radius, 0, kvImageEdgeExtend);
+
         }
         BOOL effectImageBuffersAreSwapped = NO;
         if (hasSaturationChange) {
@@ -206,8 +207,8 @@
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     [super touchesBegan:touches withEvent:event];
     
-    double r, g, b, a;
-    double darkenFactor = 0.3f;
+    CGFloat r, g, b, a;
+    CGFloat darkenFactor = 0.3f;
     UIColor *darkerColor;
     if ([self.originalBackgroundColor getRed:&r green:&g blue:&b alpha:&a]) {
         darkerColor = [UIColor colorWithRed:MAX(r - darkenFactor, 0.0) green:MAX(g - darkenFactor, 0.0) blue:MAX(b - darkenFactor, 0.0) alpha:a];
@@ -354,7 +355,7 @@ static RNFrostedSidebar *rn_frostedMenu;
                           delay:(initDelay + idx*0.1f)
          usingSpringWithDamping:10
           initialSpringVelocity:50
-                        options:UIViewAnimationOptionBeginFromCurrentState
+                        options:0
                      animations:^{
                          view.layer.transform = CATransform3DIdentity;
                          view.alpha = 1;
@@ -482,10 +483,13 @@ static RNFrostedSidebar *rn_frostedMenu;
 - (void)dismissAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion {
     void (^completionBlock)(BOOL) = ^(BOOL finished){
         [self rn_removeFromParentViewControllerCallingAppearanceMethods:YES];
-        
+      
         if ([self.delegate respondsToSelector:@selector(sidebar:didDismissFromScreenAnimated:)]) {
             [self.delegate sidebar:self didDismissFromScreenAnimated:YES];
         }
+        
+        rn_frostedMenu = nil;
+        
 		if (completion) {
 			completion(finished);
 		}
@@ -624,7 +628,7 @@ static RNFrostedSidebar *rn_frostedMenu;
     }];
     
     NSInteger items = [self.itemViews count];
-    self.contentView.contentSize = CGSizeMake(0, items * (self.itemSize.height + leftPadding) + leftPadding);
+    self.contentView.contentSize = CGSizeMake(0, items * (self.itemSize.height + topPadding) + topPadding);
 }
 
 - (NSInteger)indexOfTap:(CGPoint)location {
