@@ -125,6 +125,12 @@ The border width for item views. Default 2.
 @property (nonatomic, weak) id <RNFrostedSidebarDelegate> delegate;
 ```
 
+The label font and color. Default to 14pt white system font. The keys are ```RNFrostedLabelFont``` and ```RNFrostedLabelColor```.
+```objc
+- (void)setLabelOptions:(NSDictionary*)options;
+```
+
+
 An optional delegate to respond to selection of item views. Optional delegate methods, provided by [George Villasboas](https://github.com/ghvillasboas), include:
 
 ```objc

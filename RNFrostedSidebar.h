@@ -11,6 +11,9 @@
 
 #import <UIKit/UIKit.h>
 
+FOUNDATION_EXPORT NSString *const RNFrostedLabelFont;
+FOUNDATION_EXPORT NSString *const RNFrostedLabelColor;
+
 @class RNFrostedSidebar;
 
 @protocol RNFrostedSidebarDelegate <NSObject>
@@ -66,6 +69,7 @@
 // An optional delegate to respond to interaction events
 @property (nonatomic, weak) id <RNFrostedSidebarDelegate> delegate;
 
+- (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors labelStrings:(NSArray*)labels;
 - (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices borderColors:(NSArray *)colors;
 - (instancetype)initWithImages:(NSArray *)images selectedIndices:(NSIndexSet *)selectedIndices;
 - (instancetype)initWithImages:(NSArray *)images;
@@ -77,5 +81,7 @@
 - (void)dismiss;
 - (void)dismissAnimated:(BOOL)animated;
 - (void)dismissAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
+
+- (void)setLabelOptions:(NSDictionary*)options;
 
 @end

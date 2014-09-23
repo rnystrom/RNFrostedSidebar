@@ -49,9 +49,29 @@
                         [UIColor colorWithRed:126/255.f green:242/255.f blue:195/255.f alpha:1],
                         [UIColor colorWithRed:119/255.f green:152/255.f blue:255/255.f alpha:1],
                         ];
-    
-    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors];
+	
+	NSArray* labels = @[@"gear",
+						@"globe",
+						@"profile",
+						@"star",
+						@"gear",
+						@"globe",
+						@"profile",
+						@"star",
+						@"gear",
+						@"globe",
+						@"profile",
+						@"star"
+						];
+    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors labelStrings:labels];
+//    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors];
 //    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images];
+	
+	[callout setLabelOptions:@{
+							   RNFrostedLabelFont: [UIFont systemFontOfSize:14],
+							   RNFrostedLabelColor: [UIColor whiteColor]
+							   }];
+	
     callout.delegate = self;
 //    callout.showFromRight = YES;
     [callout show];
