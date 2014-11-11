@@ -394,8 +394,31 @@ static RNFrostedSidebar *rn_frostedMenu;
     blurImage = [blurImage applyBlurWithRadius:5 tintColor:self.tintColor saturationDeltaFactor:1.8 maskImage:nil];
     
     [self rn_addToParentViewController:controller callingAppearanceMethods:YES];
-    self.view.frame = controller.view.bounds;
     
+    if (!controller.navigationController.navigationBarHidden) {
+            // Get the height of the nav.bar
+        CGFloat navBarYOffset = controller.navigationController.navigationBar.intrinsicContentSize.height;
+        
+            // Change the frame size & position
+        self.view.frame = CGRectMake(controller.view.bounds.origin.x,
+                                     controller.view.bounds.origin.y + navBarYOffset,
+                                     controller.view.bounds.size.width,
+                                     controller.view.bounds.size.height - navBarYOffset);
+        
+            // Crop the blurred image
+        CGRect crop_rect = CGRectMake(0,
+                                      navBarYOffset,
+                                      self.view.frame.size.width,
+                                      self.view.frame.size.height);
+        UIGraphicsBeginImageContextWithOptions(crop_rect.size, false, [blurImage scale]);
+        [blurImage drawAtPoint:CGPointMake(-crop_rect.origin.x, -crop_rect.origin.y)];
+        blurImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+    }
+    else {
+        self.view.frame = controller.view.bounds;
+    }
+        
     CGFloat parentWidth = self.view.bounds.size.width;
     
     CGRect contentFrame = self.view.bounds;
