@@ -22,7 +22,8 @@ NSString *const RNFrostedLabelColor = @"RNFrostedLabelColor";
     UIGraphicsBeginImageContext(self.bounds.size);
     if([self respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)]){
         if (![self drawViewHierarchyInRect:self.bounds afterScreenUpdates:NO]) {
-            [NSException raise:@"" format:@"RNFrostedSidebar: unable to drawViewHierarchyInRect!"];
+            // do not throw exceiption...
+//            [NSException raise:@"" format:@"RNFrostedSidebar: unable to drawViewHierarchyInRect!"];
         }
     } else {
         // Important: The OS X v10.5 implementation of this method does not support the entire Core Animation composition model.
