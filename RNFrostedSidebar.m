@@ -367,6 +367,7 @@ static RNFrostedSidebar *rn_frostedMenu;
 				label.text = labels[idx];
 				label.backgroundColor = UIColor.clearColor;
 				label.textAlignment = NSTextAlignmentCenter;
+                label.numberOfLines = 0;
 				[labelsArray addObject:label];
 				[self.contentView addSubview:label];
 			}
@@ -765,20 +766,47 @@ static RNFrostedSidebar *rn_frostedMenu;
 
 - (void)layoutItems {
     CGFloat leftPadding = (self.width - self.itemSize.width)/2;
-    CGFloat topPadding = leftPadding;
+    CGFloat __block topPadding = leftPadding;
+    
+    NSMutableArray *labelHeights = [[NSMutableArray alloc] init];
+    topPadding = leftPadding;
+    [self.labels enumerateObjectsUsingBlock:^(UILabel *label, NSUInteger idx, BOOL *stop) {
+        
+        // calculate label height
+        CGSize maximumLabelSize = CGSizeMake(self.width, FLT_MAX);
+        CGSize expectedLabelSize = [label.text sizeWithFont:label.font constrainedToSize:maximumLabelSize lineBreakMode:label.lineBreakMode];
+
+        [labelHeights addObject:[NSNumber numberWithFloat:expectedLabelSize.height]];
+
+        if (idx > 0) {
+            topPadding += [[labelHeights objectAtIndex:idx - 1] floatValue];
+            topPadding += leftPadding;
+        }
+        
+        topPadding += self.itemSize.height;
+
+        CGRect frame = CGRectMake(0, topPadding, self.width, expectedLabelSize.height);
+        label.frame = frame;
+    }];
+    
+    topPadding = leftPadding;
     [self.itemViews enumerateObjectsUsingBlock:^(RNCalloutItemView *view, NSUInteger idx, BOOL *stop) {
-        CGRect frame = CGRectMake(leftPadding, topPadding*idx + self.itemSize.height*idx + topPadding, self.itemSize.width, self.itemSize.height);
+        if (idx > 0) {
+            topPadding += [[labelHeights objectAtIndex:idx - 1] floatValue];
+            topPadding += self.itemSize.height;
+            topPadding += leftPadding;
+        }
+     
+        CGRect frame = CGRectMake(leftPadding, topPadding, self.itemSize.width, self.itemSize.height);
         view.frame = frame;
         view.layer.cornerRadius = frame.size.width/2.f;
     }];
-
-	[self.labels enumerateObjectsUsingBlock:^(UILabel *label, NSUInteger idx, BOOL *stop) {
-        CGRect frame = CGRectMake(0, topPadding*idx + self.itemSize.height*(idx+1) + topPadding, self.width, 24);
-        label.frame = frame;
-    }];
-	
-    NSInteger items = [self.itemViews count];
-    self.contentView.contentSize = CGSizeMake(0, items * (self.itemSize.height + leftPadding) + leftPadding);
+    
+    // add height of last item to topPadding
+    topPadding += [[labelHeights objectAtIndex:[self.itemViews count] - 1] floatValue];
+    topPadding += self.itemSize.height;
+    
+    self.contentView.contentSize = CGSizeMake(0, topPadding);
 }
 
 - (NSInteger)indexOfTap:(CGPoint)location {

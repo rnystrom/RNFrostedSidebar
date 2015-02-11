@@ -50,12 +50,12 @@
                         [UIColor colorWithRed:119/255.f green:152/255.f blue:255/255.f alpha:1],
                         ];
 	
-	NSArray* labels = @[@"gear",
-						@"globe",
-						@"profile",
-						@"star",
-						@"gear",
-						@"globe",
+	NSArray* labels = @[@"short Text",
+						@"short Text",
+						@"longer Text...",
+						@"More longer Text...",
+						@"Much more longer Text...",
+						@"realy realy realy realy realy realy long Text...",
 						@"profile",
 						@"star",
 						@"gear",
@@ -63,18 +63,21 @@
 						@"profile",
 						@"star"
 						];
-    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors labelStrings:labels];
+    RNFrostedSidebar *sideMenu = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors labelStrings:labels];
+    sideMenu.width = 150;
+    sideMenu.itemSize = CGSizeMake(80, 80);
+    
 //    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images selectedIndices:self.optionIndices borderColors:colors];
 //    RNFrostedSidebar *callout = [[RNFrostedSidebar alloc] initWithImages:images];
 	
-	[callout setLabelOptions:@{
-							   RNFrostedLabelFont: [UIFont systemFontOfSize:14],
+	[sideMenu setLabelOptions:@{
+							   RNFrostedLabelFont: [UIFont systemFontOfSize:20],
 							   RNFrostedLabelColor: [UIColor whiteColor]
 							   }];
 	
-    callout.delegate = self;
-//    callout.showFromRight = YES;
-    [callout show];
+    sideMenu.delegate = self;
+//    sideMenu.showFromRight = YES;
+    [sideMenu show];
 }
 
 #pragma mark - RNFrostedSidebarDelegate
