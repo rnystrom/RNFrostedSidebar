@@ -774,7 +774,11 @@ static RNFrostedSidebar *rn_frostedMenu;
         
         // calculate label height
         CGSize maximumLabelSize = CGSizeMake(self.width, FLT_MAX);
-        CGSize expectedLabelSize = [label.text sizeWithFont:label.font constrainedToSize:maximumLabelSize lineBreakMode:label.lineBreakMode];
+        
+        NSDictionary *attributes = @{NSFontAttributeName: label.font};
+        CGRect rect = [label.text boundingRectWithSize:maximumLabelSize options:NSStringDrawingUsesLineFragmentOrigin attributes:attributes context:nil];
+        
+        CGSize expectedLabelSize = rect.size;
 
         [labelHeights addObject:[NSNumber numberWithFloat:expectedLabelSize.height]];
 

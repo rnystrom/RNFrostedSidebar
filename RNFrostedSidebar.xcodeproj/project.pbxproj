@@ -340,7 +340,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "example/RNFrostedSidebar-Prefix.pch";
 				INFOPLIST_FILE = "example/RNFrostedSidebar-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				PRODUCT_NAME = RNFrostedSidebar;
 				WRAPPER_EXTENSION = app;
 			};
@@ -358,7 +358,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "example/RNFrostedSidebar-Prefix.pch";
 				INFOPLIST_FILE = "example/RNFrostedSidebar-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				PRODUCT_NAME = RNFrostedSidebar;
 				WRAPPER_EXTENSION = app;
 			};
