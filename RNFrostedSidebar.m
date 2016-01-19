@@ -329,7 +329,7 @@ static RNFrostedSidebar *rn_frostedMenu;
     return YES;
 }
 
-- (NSUInteger)supportedInterfaceOrientations {
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskAll;
 }
 
